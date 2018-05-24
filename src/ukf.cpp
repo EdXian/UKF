@@ -3,7 +3,10 @@
 ukf::ukf(){
 
   std::cout<<"ukf initialize"<<std::endl;
-  lambda= alpha * alpha * (state_size + kappa) - state_size;
+
+
+  lambda= alpha * alpha * (x_size + kappa) -x_size;
+  x_sigmavector_size = x_size*2+1;
   x.setZero();
 
 
@@ -11,13 +14,9 @@ ukf::ukf(){
 
 
 }
-ukf::~ukf(){
 
 
-
-}
-
-
+//time update
 void ukf::predict(){
 
    std::cout<<"correct"<<std::endl;
@@ -27,7 +26,7 @@ void ukf::predict(){
 
 }
 
-
+//measurement update
 void ukf::update(){
 
       std::cout<<"predict"<<std::endl;
@@ -39,6 +38,11 @@ void ukf::update(){
   //    // First sigma point is the current state X0=[x x+sigmap(1) x-sigmap(1)   ]
 
   //    //
+
+
+
+}
+ukf::~ukf(){
 
 
 

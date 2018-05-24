@@ -6,6 +6,7 @@
 
 
 Eigen::MatrixXd A(3,3);
+Eigen::VectorXd B(3);
 //using namespace  std;
 
 
@@ -22,8 +23,9 @@ int main(){
 //  cout << "To check this, let us compute L * L.transpose()" << endl;
 //  cout << L * L.transpose() << endl;
 //  cout << "This should equal the matrix A" << endl
-
-
+B<<1,2,3;
+std::cout<<B<<std::endl;
+std::cout<<B.transpose()<<std::endl;
 
 A << Eigen::MatrixXd::Identity(3,3);
 
