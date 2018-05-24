@@ -10,10 +10,12 @@ public:
   ukf();
   ~ukf();
 
-  int L;
+  double L;
+  //vector size
   int x_size;
+  int y_size;
   int x_sigmavector_size;
-
+  int y_sigmavector_size;
 
 
   void predict();
@@ -22,21 +24,21 @@ public:
 
 
 private:
+
  Eigen::VectorXd w_c ; //weight c
  Eigen::VectorXd w_m ;  //weight m
  Eigen::VectorXd x ; //states
  Eigen::VectorXd y ; //measurements
- Eigen::VectorXd x_sigmavector ;
- Eigen::VectorXd y_sigmavector ;
 
+ Eigen::MatrixXd x_sigmavector ;
+ Eigen::MatrixXd y_sigmavector ;
  Eigen::MatrixXd H ;
 
  Eigen::MatrixXd P ; //covariance matrix
- Eigen::MatrixXd P_xx ;
+ Eigen::MatrixXd P_yy ;
  Eigen::MatrixXd P_xy ;
 
  Eigen::MatrixXd Kalman_gain ;
-
 
  double alpha = 1e-3;
  double kappa = 0;

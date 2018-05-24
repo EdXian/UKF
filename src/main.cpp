@@ -7,13 +7,18 @@
 
 Eigen::MatrixXd A(3,3);
 Eigen::VectorXd B(3);
+Eigen::VectorXd C(3);
 //using namespace  std;
 
 
 int main(){
 
 
-  ukf new_ukf();
+  ukf ukf1;
+
+  ukf1.predict();
+
+
 //  A << 4,-1,2, -1,6,0, 2,0,5;
 //  std::cout << "The matrix A is" <<std::endl << A << std::endl;
 //  Eigen::LLT<Eigen::MatrixXd> lltOfA(A); // compute the Cholesky decomposition of A
@@ -23,15 +28,20 @@ int main(){
 //  cout << "To check this, let us compute L * L.transpose()" << endl;
 //  cout << L * L.transpose() << endl;
 //  cout << "This should equal the matrix A" << endl
-B<<1,2,3;
-std::cout<<B<<std::endl;
-std::cout<<B.transpose()<<std::endl;
 
-A << Eigen::MatrixXd::Identity(3,3);
+// B<<1,2,3;
+// std::cout<<B<<std::endl;
+//// std::cout<<B.transpose()<<std::endl;
 
- std::cout<< A<< std::endl;
- A.setZero();
- std::cout<< A<< std::endl;
+// C<<B;
+//std::cout<<C<<std::endl;
+
+
+// A << Eigen::MatrixXd::Identity(3,3);
+
+// std::cout<< A<< std::endl;
+// A.setZero();
+// std::cout<< A<< std::endl;
 
  std::cout <<"ok"<<std::endl;
 
