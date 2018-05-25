@@ -30,6 +30,10 @@ private:
  Eigen::VectorXd x ; //states
  Eigen::VectorXd y ; //measurements
 
+ Eigen::VectorXd x_mean; //x mean
+ Eigen::VectorXd y_mean; //y mean
+
+
  Eigen::MatrixXd x_sigmavector ;
  Eigen::MatrixXd y_sigmavector ;
  Eigen::MatrixXd H ;
@@ -45,8 +49,8 @@ private:
  double beta = 2;
  double lambda = 0.0;
 
- double y_mean = 0.0;
- double x_mean = 0.0;
+// double y_mean = 0.0;
+// double x_mean = 0.0;
 
 
 };
