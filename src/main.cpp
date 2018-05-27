@@ -17,7 +17,7 @@ int main(){
   ukf ukf1;
 
   ukf1.predict();
-
+  ukf1.update();
 
 //  A << 4,-1,2, -1,6,0, 2,0,5;
 //  std::cout << "The matrix A is" <<std::endl << A << std::endl;
@@ -35,10 +35,7 @@ int main(){
 
 // C<<B;
 //std::cout<<C<<std::endl;
-
-
 // A << Eigen::MatrixXd::Identity(3,3);
-
 // std::cout<< A<< std::endl;
 // A.setZero();
 // std::cout<< A<< std::endl;

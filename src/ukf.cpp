@@ -4,27 +4,26 @@ ukf::ukf(){
 
   std::cout<<"ukf initialize"<<std::endl;
   x_size = 2;
-  y_size =x_size;
+  y_size =1;
   L=x_size;
   x_sigmavector_size=2*x_size+1;
 
   lambda= alpha * alpha * (L + kappa) -L;
 
   x.setZero(x_size);
- // x.setOnes(x_size);
-
 
   x_sigmavector.setZero(x_size,x_sigmavector_size);
 
 
 
-  y.setZero(y_size);
-
-  y_sigmavector.setZero(x_size,x_sigmavector_size);  //to be determined
+  y_sigmavector.setZero(x_size,1);
 
 
-  std::cout<< "L  " <<L <<std::endl;
-  std::cout << "lambda  " <<lambda<<std::endl;
+  H.setZero(1,2);  // measurement matrix
+
+  H<<1,0;
+  y = H*x;
+
   w_c.setZero(x_sigmavector_size);
   w_m.setZero(x_sigmavector_size);
 
@@ -37,115 +36,77 @@ ukf::ukf(){
     w_m(i) = 1/(2*(L+lambda));
   }
 
-  std::cout<< w_m(0) <<std::endl;
 
-//  double sum=0.0;
-//  for(int i = 0; i<x_sigmavector_size;i++){
-//  sum+= w_m(i);
-//  }
-//  std::cout<<"sum"<<sum <<std::endl;
-//  std::cout<<"*******"<<std::endl;
-//  std::cout<< w_m<<std::endl;
-//  std::cout<<"*******"<<std::endl;
+  P=0.01*Eigen::MatrixXd::Identity(x_size, x_size);
 
-
-  //P.setZero(x_size,x_size);
-  P=0.01*Eigen::MatrixXd::Identity(x_size, y_size);
-
-//  std::cout<<"lambda ="<<lambda<<std::endl;
-//  std::cout<<P<<std::endl;
-
-
-//  std::cout <<L<<std::endl;
-//  std::cout<<L+lambda<<std::endl;
-//  std::cout<<(L+lambda)*P<<std::endl;
-
-
-  //P=(lambda+L)*P;
-  //Eigen::MatrixXd M= (P).llt().matrixL();
-
-
-
-  P_yy.setZero(x_size,x_size);
-
-  P_xy.setZero(x_size,x_size);
-
-  Kalman_gain.setZero(x_size,x_size);
+  P_yy.setZero(x_sigmavector_size,1);
 
 }
+
+
+
+
+
 
 //time update
 void ukf::predict(){
 
-  std::cout<<"correct"<<std::endl;
 
-  P=(lambda+L)*P;
-  Eigen::MatrixXd M= (P).llt().matrixL();
- // std::cout<<M.row(0).transpose()<<std::endl;
-//  Eigen::VectorXd sigma_p = M.row(0).transpose();
-//  Eigen::VectorXd sigma_n = M.row(1).transpose();
-
-//  std::cout<< M <<std::endl;
-//  std::cout<< x <<std::endl;
-  //update your dynamics here
-
-
-
-  std::cout<<"--------"<<std::endl;
-
-  x_sigmavector(0,0) = x(0);
-  x_sigmavector(1,0) = x(1);
 
   //find sigma point
+  P=(lambda+L)*P;
+  Eigen::MatrixXd M= (P).llt().matrixL();
+
+
+  x_sigmavector.col(0) = x;
   for(int i=0;i<x_size;i++)
   {
-    Eigen::VectorXd data = x + M.row(i).transpose();
-    x_sigmavector(0,i+1)=data(0);
-    x_sigmavector(1,i+1)=data(1);
-  }
-  for(int i=x_size;i<2*x_size;i++)
-  {
-    Eigen::VectorXd data = x - M.row(i-x_size).transpose();
+    Eigen::VectorXd data =  M.row(i).transpose();
 
-    x_sigmavector(0,i+1)=data(0);
-    x_sigmavector(1,i+1)=data(1);
+    x_sigmavector.col(i+1) = x + data;
+
+    x_sigmavector.col(i+x_size+1) = x - data;
   }
 
-  x_mean.setZero(x_size);
 
+  //predict state based on system dynamics
+
+
+
+
+  std::cout<<"x_sigma"<<std::endl<< x_sigmavector <<std::endl;
+  x_mean.setZero(x_size);   //initialize x_mean
   for(int i=0;i<x_sigmavector_size;i++){
-   x_mean(0) += w_m(i) * x_sigmavector(0,i);
-   x_mean(1) += w_m(i) * x_sigmavector(1,i);
+    x_mean += w_m(i)* x_sigmavector.col(i);
   }
-  std::cout<< "x_mean " << std::endl<< x_mean <<std::endl;
+
 
   for(int i=0 ; i<x_sigmavector_size ;i++){
     P =   w_c(i) * x_sigmavector * x_sigmavector.transpose();
   }
 
   for(int i=0;i<x_sigmavector_size ; i++){
-
+    y_sigmavector = H*x_sigmavector;
   }
+
   y_mean.setZero(y_size);
   for(int i=0;i< x_sigmavector_size;i++){
-    y_mean(0) += w_m(i) * y_sigmavector(0,i);
-    y_mean(1) += w_m(i) * y_sigmavector(1,i);
+    y_mean += w_m(i) * y_sigmavector.col(i);
   }
-
 }
 
 //measurement update
 void ukf::update(){
 
-      std::cout<<"predict"<<std::endl;
 
     for(int i=0;i<x_sigmavector_size;i++){
 
       Eigen::VectorXd err(2);
+      Eigen::VectorXd err_t;
       err = y_sigmavector.col(i) - y_mean;
-//      err(0) = y_sigmavector(0,i) - y_mean(0);
-//      err(1) = y_sigmavector(1,i) - y_mean(1);
-      P_yy += w_c(i) * err * err.transpose();
+      err_t = err.transpose();
+
+      P_yy += w_c(i) * err * err_t;
     }
 
     for(int i=0;i<x_sigmavector_size;i++){
@@ -154,27 +115,38 @@ void ukf::update(){
 
       erry = y_sigmavector.col(i) - y_mean;
       errx = x_sigmavector.col(i) - x_mean;
-//      err(0) = y_sigmavector(0,i) - y_mean(0);
-//      err(1) = y_sigmavector(1,i) - y_mean(1);
-
-      P_yy += w_c(i) * errx * erry.transpose();
+      P_xy += w_c(i) * errx * erry.transpose();
     }
 
 
-    Kalman_gain = P_xy * P_yy;
-    x = x_mean + Kalman_gain *(y - y_mean);
+
+    Kalman_gain = P_xy * P_yy.inverse();
+
+
+
+
+    Eigen::VectorXd merr = y-y_mean;
+
+    x = x_mean + Kalman_gain *(merr);
+
     P = P - Kalman_gain*P_yy*Kalman_gain.transpose();
+    std::cout << "x" <<std::endl<< x <<std::endl;
+    std::cout << "P" <<std::endl<< P <<std::endl;
 
-  //    //weightecov = ((n+lambda)* estimate_errcovar ) sqrt (L*L_T)
-  //    // First sigma point is the current state X0=[x x+sigmap(1) x-sigmap(1)   ]
-
-  //    //
-
-
-
+    std::cout<<"update ok"<<std::endl;
 }
+
+Eigen::MatrixXd ukf::dynamics(Eigen::MatrixXd sigma_state){
+
+  Eigen::MatrixXd predict_sigma_state(x_size,x_sigmavector_size);
+  for(i=0;i<x_sigmavector_size;i++){
+    predict_sigma_state(0,i) =   sigma_state(0,i)+ sigma_state(1,i)*dt;
+    predict_sigma_state(1,i) =   cos(sigma_state(0,i));
+  }
+  return predict_sigma_state;
+}
+
+
 ukf::~ukf(){
-
-
 
 }

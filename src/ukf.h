@@ -17,7 +17,7 @@ public:
   int x_sigmavector_size;
   int y_sigmavector_size;
 
-
+  Eigen::VectorXd dynamics(Eigen::VectorXd state);
   void predict();
   void update();
 
@@ -36,7 +36,7 @@ private:
 
  Eigen::MatrixXd x_sigmavector ;
  Eigen::MatrixXd y_sigmavector ;
- Eigen::MatrixXd H ;
+ Eigen::MatrixXd H ;    //measurement transform
 
  Eigen::MatrixXd P ; //covariance matrix
  Eigen::MatrixXd P_yy ;
