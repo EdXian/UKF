@@ -3,6 +3,8 @@
 ukf::ukf(){
   dt = 0.01;
   std::cout<<"ukf initialize"<<std::endl;
+
+
   x_size = 2;
   y_size =1;
   L=x_size;
@@ -39,25 +41,15 @@ ukf::ukf(){
     w_m(i) = 1/(2*(L+lambda));
   }
 
-
+  Q =1e-4*Eigen::MatrixXd::Identity(x_size, x_size);
+  R =1e-3*Eigen::MatrixXd::Identity(y_size,y_size);
   P=1e-3*Eigen::MatrixXd::Identity(x_size, x_size);
   P_.setZero(x_size,x_size);
   P_yy.setZero(y_size,y_size);
   P_xy.setZero(x_size,y_size);
-
-  //initialize state
-  //std::cout<<"initialize"<<std::endl;
   x<<0,0;
-  //std::cout<<"initialize"<<std::endl;
   x_hat<<0,0;
-  //x_a  <<0,0,0,0,0;
-  //std::cout<<"x_a"<<std::endl<<x_a<<std::endl;
-  //std::cout<<"x_hat"<<std::endl<<x_hat<<std::endl;
-  P = (x-x_hat)*(x-x_hat).transpose();
-  //std::cout<<"P"<<std::endl<<P<<std::endl;
-
   P_a= (x_a-x_a_hat)*(x_a-x_a_hat).transpose();
-  //std::cout<<"P_a"<<std::endl<<P_a<<std::endl;
 }
 
 
@@ -69,49 +61,19 @@ ukf::ukf(){
 void ukf::predict(){
 
 
- if(isinit){
-     P_a=(lambda+L)*P_a;
-     Eigen::MatrixXd M= (P_a).llt().matrixL();
-
-    x_a_sigmavector.col(0) = x_a;
-    for(int i=0;i<x_size+x_size+y_size;i++)
-    {
-
-        Eigen::VectorXd sigma =  (M.row(i)).transpose();
-        x_sigmavector.col(i+1) = x_a + sigma;
-        x_sigmavector.col(i+x_size+x_size+y_size+1) = x_a - sigma;
-    }
-
-    isinit = false;
- }else{
-
-      P_a=(lambda+L)*P_a;
-
-      //todo
-
-
-
- }
 
 //find sigma point
-//  Eigen::MatrixXd M= (P_a).llt().matrixL();
-//  x_sigmavector.col(0) = x;
-//  for(int i=0;i<x_size;i++)
-//  {
+  P=(lambda+L)*P;
+  Eigen::MatrixXd M= (P).llt().matrixL();
+  x_sigmavector.col(0) = x;
+  for(int i=0;i<x_size;i++)
+  {
 
-//    Eigen::VectorXd sigma =  (M.row(i)).transpose();
-//    x_sigmavector.col(i+1) = x + sigma;
+    Eigen::VectorXd sigma =  (M.row(i)).transpose();
+    x_sigmavector.col(i+1) = x + sigma;
 
-//    x_sigmavector.col(i+x_size+1) = x - sigma;
-//  }
-
-
-  //predict state based on system dynamics
-//    std::cout<< "----------------"<<std::endl;
-//    std::cout<<"x_sigmavector" <<std::endl<<x_sigmavector<<std::endl;
-//    x_sigmavector = dynamics(x_sigmavector);
-//    std::cout<<"x_sigmavector" <<std::endl<<x_sigmavector<<std::endl;
-//    std::cout<< "++++++++++++++++"<<std::endl;
+    x_sigmavector.col(i+x_size+1) = x - sigma;
+  }
 
    //x_hat (mean)
   x_hat.setZero(x_size);   //initialize x_hat
@@ -123,12 +85,9 @@ void ukf::predict(){
   for(int i=0 ; i<x_sigmavector_size ;i++){
     P_+=   w_c(i) * (x_sigmavector.col(i)-x_hat) * ((x_sigmavector.col(i)-x_hat).transpose());
   }
+  //add process noise covariance
+    P_+= Q;
 
-//  std::cout<< "----------------"<<std::endl;
-//  std::cout<<"P_" <<std::endl<<P_<<std::endl;
-//  std::cout<< "++++++++++++++++"<<std::endl;
-
-    //measurement sigma vector
   for(int i=0;i<x_sigmavector_size ; i++){
     y_sigmavector = H*x_sigmavector;
   }
@@ -154,7 +113,8 @@ void ukf::correct(double measure){
       err_t = err.transpose();
       P_yy += w_c(i) * err * err_t;
     }
-
+     //add measurement noise covarinace
+     P_yy +=R;
 
     for(int i=0;i<x_sigmavector_size;i++){
 
@@ -170,13 +130,9 @@ void ukf::correct(double measure){
     x = x_hat + Kalman_gain *(y-y_hat);
 
     P = P_ - Kalman_gain*P_yy*(Kalman_gain.transpose());
-    std::cout << "-------------------------"<<std::endl;
 
-    std::cout<<"P_"<<std::endl <<P_<<std::endl;
-     std::cout<<"P"<<std::endl <<P<<std::endl;
-
-    std::cout<<"++++++++++++++++=+++++++++"<<std::endl;
 }
+
 
 Eigen::MatrixXd ukf::dynamics(Eigen::MatrixXd sigma_state){
 
@@ -185,21 +141,33 @@ Eigen::MatrixXd ukf::dynamics(Eigen::MatrixXd sigma_state){
     predict_sigma_state(0,i) =   sigma_state(0,i)+ sigma_state(1,i)*dt;
     predict_sigma_state(1,i) =   cos(sigma_state(0,i))+0.99*predict_sigma_state(1,i);
   }
+
   return predict_sigma_state;
-}
-Eigen::MatrixXd ukf::force_dynamics(Eigen::MatrixXd sigma_state){
-
 
 }
+
 
 Eigen::MatrixXd ukf::rotate(double roll, double yaw, double pitch){
 
     Eigen::MatrixXd frame;
-
-
+    frame.setZero(3,3);
+    double c_r = cos(roll) , s_r = sin(roll);
+    double c_p = cos(pitch) , s_p = sin(pitch);
+    double c_y = cos(yaw) , s_y = sin(yaw);
+    frame << c_p*c_y ,c_y*s_p*s_r-s_y*c_r , c_y*s_p*c_r+s_y*s_r,
+             c_p*s_y ,s_y*s_p+c_r*c_y     , s_y*s_p*c_r-c_y*s_r,
+             -1*s_p  ,s_r*c_p             , c_r*c_p            ;
     return frame;
 }
+
+//
+
+
+
+
+
 
 ukf::~ukf(){
 
 }
+

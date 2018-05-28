@@ -4,6 +4,49 @@
 #include <eigen3/Eigen/Core>
 #include <iostream>
 
+enum state{
+  Pc_x = 0,
+  Pc_y    ,
+  Pc_z    ,
+
+  Vc_x    ,
+  Vc_y    ,
+  Vc_z    ,
+
+  theta_c ,
+  omega_c ,
+
+  theta_p ,
+  omega_p ,
+
+  F_Fx    ,
+  F_Fy    ,
+  F_Fz    ,
+
+  F_Lx    ,
+  F_Ly    ,
+  F_Lz    ,
+  state_size
+};
+
+enum measurement{
+  mP_cx = 0,
+  mP_cy    ,
+  mP_cz    ,
+
+  mtheta_c ,
+  mtheta_p ,
+
+  mF_Fx    ,
+  mF_Fy    ,
+  mF_Fz    ,
+  measure_size
+};
+
+
+
+
+
 class ukf
 {
 public:
@@ -46,6 +89,10 @@ private:
  Eigen::MatrixXd H ;    //measurement transform
 
  Eigen::MatrixXd P ; //covariance matrix
+
+ Eigen::MatrixXd Q ; //noise matrix
+ Eigen::MatrixXd R ; //noise matrix
+
  Eigen::MatrixXd P_a ; //covariance matrix
  Eigen::MatrixXd P_ ; //covariance matrix
  Eigen::MatrixXd P_yy ;
