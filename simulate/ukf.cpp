@@ -1,7 +1,7 @@
 #include "ukf.h"
 
 ukf::ukf(){
-  dt = 0.01;
+  dt = 0.02;
   std::cout<<"ukf initialize"<<std::endl;
 
 
@@ -41,14 +41,16 @@ ukf::ukf(){
     w_m(i) = 1/(2*(L+lambda));
   }
 
-  Q =1e-4*Eigen::MatrixXd::Identity(x_size, x_size);
-  R =1e-3*Eigen::MatrixXd::Identity(y_size,y_size);
-  P=1e-3*Eigen::MatrixXd::Identity(x_size, x_size);
+  Q =5e-5*Eigen::MatrixXd::Identity(x_size, x_size);
+  R =1e-1*Eigen::MatrixXd::Identity(y_size,y_size);
+  P=1e-4*Eigen::MatrixXd::Identity(x_size, x_size);
   P_.setZero(x_size,x_size);
   P_yy.setZero(y_size,y_size);
   P_xy.setZero(x_size,y_size);
+
   x<<0,0;
   x_hat<<0,0;
+
   P_a= (x_a-x_a_hat)*(x_a-x_a_hat).transpose();
 }
 
@@ -65,7 +67,9 @@ void ukf::predict(){
 //find sigma point
   P=(lambda+L)*P;
   Eigen::MatrixXd M= (P).llt().matrixL();
+  Eigen::MatrixXd buffer;
   x_sigmavector.col(0) = x;
+
   for(int i=0;i<x_size;i++)
   {
 
@@ -74,6 +78,8 @@ void ukf::predict(){
 
     x_sigmavector.col(i+x_size+1) = x - sigma;
   }
+   buffer = dynamics( x_sigmavector);
+    x_sigmavector =buffer;
 
    //x_hat (mean)
   x_hat.setZero(x_size);   //initialize x_hat
@@ -128,7 +134,8 @@ void ukf::correct(double measure){
     Kalman_gain = P_xy * (P_yy.inverse());
 
     x = x_hat + Kalman_gain *(y-y_hat);
-
+    //std::cout << "x_hat"<<std::endl <<x_hat <<std::endl;
+   // std::cout << "erry"<<std::endl <<y-y_hat <<std::endl;
     P = P_ - Kalman_gain*P_yy*(Kalman_gain.transpose());
 
 }
@@ -139,7 +146,7 @@ Eigen::MatrixXd ukf::dynamics(Eigen::MatrixXd sigma_state){
   Eigen::MatrixXd predict_sigma_state(x_size,x_sigmavector_size);
   for(int i=0;i<x_sigmavector_size;i++){
     predict_sigma_state(0,i) =   sigma_state(0,i)+ sigma_state(1,i)*dt;
-    predict_sigma_state(1,i) =   cos(sigma_state(0,i))+0.99*predict_sigma_state(1,i);
+    predict_sigma_state(1,i) =   cos(sigma_state(0,i))+0.9*predict_sigma_state(1,i);
   }
 
   return predict_sigma_state;
