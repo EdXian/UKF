@@ -1,7 +1,7 @@
 #include "ukf.h"
 
 ukf::ukf(){
-  dt = 0.02;
+  //dt = 0.02;
   std::cout<<"ukf initialize"<<std::endl;
 
 
@@ -13,12 +13,17 @@ ukf::ukf(){
   lambda= alpha * alpha * (L + kappa) -L;
 
   x.setZero(x_size);
+  y.setZero(y_size);
+
   x_hat.setZero(x_size);
+  y_hat.setZero(y_size);
+
   x_a.setZero(x_size+x_size+y_size);
   x_a_hat.setZero(x_size+x_size+y_size);
+
   x_sigmavector.setZero(x_size,x_sigmavector_size);
 
-  x_a_sigmavector.setZero(x_size+x_size+1 , 2*(x_size+x_size+y_size) +1 );
+//  x_a_sigmavector.setZero(x_size+x_size+1 , 2*(x_size+x_size+y_size) +1 );
 
   y_sigmavector.setZero(x_sigmavector_size,y_size);
 
@@ -41,17 +46,18 @@ ukf::ukf(){
     w_m(i) = 1/(2*(L+lambda));
   }
 
-  Q =5e-5*Eigen::MatrixXd::Identity(x_size, x_size);
-  R =1e-1*Eigen::MatrixXd::Identity(y_size,y_size);
+  Q =5e-7*Eigen::MatrixXd::Identity(x_size, x_size);
+  R =5e-4*Eigen::MatrixXd::Identity(y_size,y_size);
+
   P=1e-4*Eigen::MatrixXd::Identity(x_size, x_size);
   P_.setZero(x_size,x_size);
   P_yy.setZero(y_size,y_size);
   P_xy.setZero(x_size,y_size);
 
-  x<<0,0;
-  x_hat<<0,0;
+  x<<0.1,0.1;
+  x_hat<<.1,0.1;
 
-  P_a= (x_a-x_a_hat)*(x_a-x_a_hat).transpose();
+
 }
 
 
@@ -73,7 +79,7 @@ void ukf::predict(){
   for(int i=0;i<x_size;i++)
   {
 
-    Eigen::VectorXd sigma =  (M.row(i)).transpose();
+    Eigen::VectorXd sigma =(M.row(i)).transpose();
     x_sigmavector.col(i+1) = x + sigma;
 
     x_sigmavector.col(i+x_size+1) = x - sigma;
@@ -124,7 +130,7 @@ void ukf::correct(double measure){
 
     for(int i=0;i<x_sigmavector_size;i++){
 
-      Eigen::VectorXd err_y(2) , err_x(2);
+      Eigen::VectorXd err_y , err_x;
 
       err_y = y_sigmavector.col(i) - y_hat;
       err_x = x_sigmavector.col(i) - x_hat;
@@ -134,8 +140,7 @@ void ukf::correct(double measure){
     Kalman_gain = P_xy * (P_yy.inverse());
 
     x = x_hat + Kalman_gain *(y-y_hat);
-    //std::cout << "x_hat"<<std::endl <<x_hat <<std::endl;
-   // std::cout << "erry"<<std::endl <<y-y_hat <<std::endl;
+
     P = P_ - Kalman_gain*P_yy*(Kalman_gain.transpose());
 
 }
@@ -145,10 +150,12 @@ Eigen::MatrixXd ukf::dynamics(Eigen::MatrixXd sigma_state){
 
   Eigen::MatrixXd predict_sigma_state(x_size,x_sigmavector_size);
   for(int i=0;i<x_sigmavector_size;i++){
-    predict_sigma_state(0,i) =   sigma_state(0,i)+ sigma_state(1,i)*dt;
-    predict_sigma_state(1,i) =   cos(sigma_state(0,i))+0.9*predict_sigma_state(1,i);
-  }
 
+    //system dynamics
+    predict_sigma_state(0,i) =   sigma_state(0,i)+ sigma_state(1,i)*dt;
+    predict_sigma_state(1,i) =   cos(sigma_state(0,i))+0.99*sigma_state(1,i);
+
+  }
   return predict_sigma_state;
 
 }
