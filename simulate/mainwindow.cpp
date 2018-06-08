@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->customPlot_2->legend->setVisible(true);
 
 
-    ukf ukf1;
+    ukf ukf1(2,1);
     double velocity = 0.0 ;
     double pos = 0.0;
     double measure=0.0;
@@ -36,8 +36,13 @@ MainWindow::MainWindow(QWidget *parent) :
     double T=0.0;
 
 
-    ukf1.dt = 0.02;
 
+    Eigen::MatrixXd measurement_matrix;
+    measurement_matrix.setZero(1,2);
+    measurement_matrix<< 1,0;
+    std::cout <<"card2"<<std::endl;
+    ukf1.set_measurement_matrix(measurement_matrix);
+std::cout <<"card3"<<std::endl;
 
 
     QVector<double> x(1001), y(1001) ,z(1001),w(1001),p(1001),q(1001); // initialize with entries 0..100
@@ -46,14 +51,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
       T+=dt;
+
       pos = pos+ velocity* dt;
-      measure = pos + (rand()%100-50)*0.001;
+      measure = pos + (rand()%100-50)*0.005;
+
+      ukf1.dt = 0.02;
       velocity = cos(pos)+0.99*velocity;
 
 
 
       ukf1.predict();
-      ukf1.correct(measure);
+
+      Eigen::VectorXd measure_vector;
+      measure_vector.setZero(1);
+      measure_vector<<measure;
+      ukf1.correct(measure_vector);
 
 
       x[i] = T;

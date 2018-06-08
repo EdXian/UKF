@@ -27,12 +27,14 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         qcustomplot.cpp \
-    ukf.cpp
+    ukf.cpp \
+    forceest.cpp
 
 HEADERS += \
         mainwindow.h \
         qcustomplot.h \
-    ukf.h
+    ukf.h \
+    forceest.h
 
 FORMS += \
         mainwindow.ui

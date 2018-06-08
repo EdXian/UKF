@@ -1,12 +1,19 @@
 #include "ukf.h"
 
-ukf::ukf(){
-  //dt = 0.02;
-  std::cout<<"ukf initialize"<<std::endl;
+ukf::ukf(int state_size , int measurement_size){
+
+    x_size = state_size;
+    y_size = measurement_size;
+
+    std::cout <<x <<std::endl;
+    std::cout <<y <<std::endl;
+
+    alpha = 1e-3;
+    kappa = 0;
+    beta = 2;
+    lambda = 0.0;
 
 
-  x_size = 2;
-  y_size =1;
   L=x_size;
   x_sigmavector_size=2*x_size+1;
 
@@ -19,19 +26,15 @@ ukf::ukf(){
   y_hat.setZero(y_size);
 
   x_a.setZero(x_size+x_size+y_size);
-  x_a_hat.setZero(x_size+x_size+y_size);
+  //x_a_hat.setZero(x_size+x_size+y_size);
 
   x_sigmavector.setZero(x_size,x_sigmavector_size);
 
-//  x_a_sigmavector.setZero(x_size+x_size+1 , 2*(x_size+x_size+y_size) +1 );
-
   y_sigmavector.setZero(x_sigmavector_size,y_size);
-
 
   H.setZero(y_size,x_size);  // measurement matrix
 
-  H<<1,0;
-  //initialize y
+
   y = H*x;
 
   w_c.setZero(x_sigmavector_size);
@@ -46,18 +49,18 @@ ukf::ukf(){
     w_m(i) = 1/(2*(L+lambda));
   }
 
+  // default Q R P matrix
   Q =5e-7*Eigen::MatrixXd::Identity(x_size, x_size);
   R =5e-4*Eigen::MatrixXd::Identity(y_size,y_size);
+  P=1e-3*Eigen::MatrixXd::Identity(x_size, x_size);
 
-  P=1e-4*Eigen::MatrixXd::Identity(x_size, x_size);
+
   P_.setZero(x_size,x_size);
   P_yy.setZero(y_size,y_size);
   P_xy.setZero(x_size,y_size);
 
   x<<0.1,0.1;
   x_hat<<.1,0.1;
-
-
 }
 
 
@@ -113,8 +116,8 @@ void ukf::predict(){
 
 
 //measurement update
-void ukf::correct(double measure){
-    y<< measure;
+void ukf::correct(Eigen::VectorXd measure){
+    y=measure;
     P_yy.setZero(y_size,y_size);
     P_xy.setZero(x_size,y_size);
 
@@ -174,9 +177,9 @@ Eigen::MatrixXd ukf::rotate(double roll, double yaw, double pitch){
     return frame;
 }
 
-//
-
-
+void ukf::set_measurement_matrix(Eigen::MatrixXd matrix){
+    H = matrix;
+}
 
 
 
