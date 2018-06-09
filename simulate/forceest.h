@@ -3,10 +3,32 @@
 #include "ukf.h"
 #include "iostream"
 
+
+
+enum state{
+    pos=0,
+    velocity,
+    statesize
+};
+
+enum measurement{
+    mpos = 0,
+    measurementsize
+};
+
+
 class forceest : public ukf
 {
+
 public:
-    forceest();
+forceest(int x, int y) : ukf(x,y){
+
+}
+Eigen::MatrixXd dynamics(Eigen::MatrixXd sigma_state);
+
+private:
+
+
 };
 
 #endif // FORCEEST_H

@@ -3,7 +3,7 @@
 #include "iostream"
 #include "math.h"
 #include "ukf.h"
-
+#include "forceest.h"
 using Eigen::MatrixXd;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -29,21 +29,25 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     ukf ukf1(2,1);
+
     double velocity = 0.0 ;
     double pos = 0.0;
     double measure=0.0;
     double dt =0.02;
     double T=0.0;
 
-
+    forceest forceest1(statesize,measurementsize);
 
     Eigen::MatrixXd measurement_matrix;
     measurement_matrix.setZero(1,2);
     measurement_matrix<< 1,0;
-    std::cout <<"card2"<<std::endl;
-    ukf1.set_measurement_matrix(measurement_matrix);
-std::cout <<"card3"<<std::endl;
 
+
+
+    forceest1.set_measurement_matrix(measurement_matrix);
+
+
+     forceest1.dt = 0.02;
 
     QVector<double> x(1001), y(1001) ,z(1001),w(1001),p(1001),q(1001); // initialize with entries 0..100
     for (int i=0; i<1001; ++i)
@@ -55,26 +59,28 @@ std::cout <<"card3"<<std::endl;
       pos = pos+ velocity* dt;
       measure = pos + (rand()%100-50)*0.005;
 
-      ukf1.dt = 0.02;
+
       velocity = cos(pos)+0.99*velocity;
 
 
+      forceest1.predict();
 
-      ukf1.predict();
+
 
       Eigen::VectorXd measure_vector;
       measure_vector.setZero(1);
       measure_vector<<measure;
-      ukf1.correct(measure_vector);
 
+
+      forceest1.correct(measure_vector);
 
       x[i] = T;
       y[i] = pos; // let's plot a rquadratic function
       z[i] = velocity;
       w[i] = measure;
-      p[i] = ukf1.x(0);
-      q[i] = ukf1.x(1);
 
+       p[i] = forceest1.x(0);
+       q[i] = forceest1.x(1);
 
     }
     // create graph and assign data to it:
