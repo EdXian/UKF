@@ -42,12 +42,21 @@ MainWindow::MainWindow(QWidget *parent) :
     measurement_matrix.setZero(1,2);
     measurement_matrix<< 1,0;
 
+//    forceest1.Q = 5e-7*Eigen::MatrixXd::Identity(x_size, x_size);
+//    forceest1.R = 5e-3*Eigen::MatrixXd::Identity(y_size,y_size);
+    Eigen::MatrixXd mnoise;
 
-
+    mnoise = 1e-4*Eigen::MatrixXd::Identity(1,1);
+    forceest1.set_measurement_noise(mnoise);
     forceest1.set_measurement_matrix(measurement_matrix);
+    forceest1.dt = 0.02;
+    Eigen::MatrixXd noise;
+    noise.setZero(measurementsize,measurementsize);
+    noise =50e-3* Eigen::MatrixXd::Identity(measurementsize,measurementsize);
+    forceest1.set_measurement_noise(noise);
+    noise =5e-8* Eigen::MatrixXd::Identity(statesize,statesize);
+    forceest1.set_process_noise(noise);
 
-
-     forceest1.dt = 0.02;
 
     QVector<double> x(1001), y(1001) ,z(1001),w(1001),p(1001),q(1001); // initialize with entries 0..100
     for (int i=0; i<1001; ++i)
@@ -57,10 +66,8 @@ MainWindow::MainWindow(QWidget *parent) :
       T+=dt;
 
       pos = pos+ velocity* dt;
-      measure = pos + (rand()%100-50)*0.005;
-
-
-      velocity = cos(pos)+0.99*velocity;
+      measure = pos+ (rand()%100-50)*0.001;
+      velocity = (cos(1.2*pos) )+0.99*velocity;
 
 
       forceest1.predict();

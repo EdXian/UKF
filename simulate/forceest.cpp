@@ -3,12 +3,20 @@
 Eigen::MatrixXd forceest::dynamics(Eigen::MatrixXd sigma_state){
 
     Eigen::MatrixXd predict_sigma_state(this->x_size,this->x_sigmavector_size);
-    std::cout<<"virtual"<<std::endl;
+
     for(int i=0;i<this->x_sigmavector_size;i++){
 
-      //system dynamics
-      predict_sigma_state(0,i) =   sigma_state(0,i)+ sigma_state(1,i)*dt;
-      predict_sigma_state(1,i) =   cos(sigma_state(0,i))+0.99*sigma_state(1,i);
+        double p = sigma_state(pos,i) ;
+        double v = sigma_state(velocity,i);
+        double p_ ;
+        double v_ ;
+
+        p_ = p+v*dt;
+        v_ = cos(0.6*p)* cos(0.6*p) - sin(0.6*p) * sin(0.6*p) +0.99*v;
+
+
+        predict_sigma_state(pos,i) =  p_ ;
+        predict_sigma_state(velocity,i) =  v_;
 
     }
     return predict_sigma_state;

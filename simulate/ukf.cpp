@@ -4,10 +4,6 @@ ukf::ukf(int state_size , int measurement_size){
 
     x_size = state_size;
     y_size = measurement_size;
-
-    std::cout <<x <<std::endl;
-    std::cout <<y <<std::endl;
-
     alpha = 1e-3;
     kappa = 0;
     beta = 2;
@@ -59,8 +55,8 @@ ukf::ukf(int state_size , int measurement_size){
   P_yy.setZero(y_size,y_size);
   P_xy.setZero(x_size,y_size);
 
-  x<<0.1,0.1;
-  x_hat<<.1,0.1;
+  x<<0,0;
+  x_hat<<0,0;
 }
 
 
@@ -151,6 +147,11 @@ void ukf::correct(Eigen::VectorXd measure){
 
 Eigen::MatrixXd ukf::dynamics(Eigen::MatrixXd sigma_state){
 
+
+    Eigen::MatrixXd a = sigma_state;
+    return a;
+
+/*
   Eigen::MatrixXd predict_sigma_state(x_size,x_sigmavector_size);
   for(int i=0;i<x_sigmavector_size;i++){
 
@@ -160,7 +161,7 @@ Eigen::MatrixXd ukf::dynamics(Eigen::MatrixXd sigma_state){
 
   }
   return predict_sigma_state;
-
+*/
 }
 
 
@@ -179,6 +180,13 @@ Eigen::MatrixXd ukf::rotate(double roll, double yaw, double pitch){
 
 void ukf::set_measurement_matrix(Eigen::MatrixXd matrix){
     H = matrix;
+}
+void ukf::set_process_noise(Eigen::MatrixXd matrix){
+    this->Q = matrix;
+}
+
+void ukf::set_measurement_noise(Eigen::MatrixXd matrix){
+    this->R = matrix;
 }
 
 
