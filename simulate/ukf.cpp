@@ -103,28 +103,40 @@ void ukf::predict(){
     y_sigmavector = H*x_sigmavector;
   }
 
-  //x_hat (mean)
+  //y_hat (mean)
+
+
   y_hat.setZero(y_size);
+
   for(int i=0;i< x_sigmavector_size;i++){
     y_hat += w_m(i) * y_sigmavector.col(i);
   }
+
 }
 
 
 //measurement update
 void ukf::correct(Eigen::VectorXd measure){
+
     y=measure;
+
     P_yy.setZero(y_size,y_size);
     P_xy.setZero(x_size,y_size);
 
     for(int i=0;i<x_sigmavector_size;i++){
-      Eigen::VectorXd err;
-      Eigen::VectorXd err_t;
+      Eigen::MatrixXd err;
+      Eigen::MatrixXd err_t;
       err = y_sigmavector.col(i) - y_hat;
       err_t = err.transpose();
+      /*
+      std::cout<<"err" <<std::endl<<err <<std::endl;
+      std::cout<<"err_t" <<std::endl<<err_t <<std::endl;
+      std::cout<<"M" <<std::endl<<err * err_t <<std::endl;
+     */
       P_yy += w_c(i) * err * err_t;
     }
      //add measurement noise covarinace
+
      P_yy +=R;
 
     for(int i=0;i<x_sigmavector_size;i++){

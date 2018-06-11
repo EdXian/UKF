@@ -38,22 +38,29 @@ MainWindow::MainWindow(QWidget *parent) :
 
     forceest forceest1(statesize,measurementsize);
 
-    Eigen::MatrixXd measurement_matrix;
-    measurement_matrix.setZero(1,2);
-    measurement_matrix<< 1,0;
 
-//    forceest1.Q = 5e-7*Eigen::MatrixXd::Identity(x_size, x_size);
-//    forceest1.R = 5e-3*Eigen::MatrixXd::Identity(y_size,y_size);
+
     Eigen::MatrixXd mnoise;
 
-    mnoise = 1e-4*Eigen::MatrixXd::Identity(1,1);
+    mnoise = 1e-4*Eigen::MatrixXd::Identity(2,2);
     forceest1.set_measurement_noise(mnoise);
+
+    Eigen::MatrixXd measurement_matrix;
+    measurement_matrix.setZero(2,2);
+    measurement_matrix<< 1,0
+                          ,0,1;
+
     forceest1.set_measurement_matrix(measurement_matrix);
+
+
+
     forceest1.dt = 0.02;
     Eigen::MatrixXd noise;
     noise.setZero(measurementsize,measurementsize);
     noise =50e-3* Eigen::MatrixXd::Identity(measurementsize,measurementsize);
+
     forceest1.set_measurement_noise(noise);
+
     noise =5e-8* Eigen::MatrixXd::Identity(statesize,statesize);
     forceest1.set_process_noise(noise);
 
@@ -73,10 +80,10 @@ MainWindow::MainWindow(QWidget *parent) :
       forceest1.predict();
 
 
-
       Eigen::VectorXd measure_vector;
-      measure_vector.setZero(1);
-      measure_vector<<measure;
+      measure_vector.setZero(2);
+
+      measure_vector<<measure ,velocity+ (rand()%100-50)*0.0001;
 
 
       forceest1.correct(measure_vector);
