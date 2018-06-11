@@ -13,7 +13,6 @@ enum state{
 
 enum measurement{
     mpos = 0,
-    mvel,
     measurementsize
 };
 

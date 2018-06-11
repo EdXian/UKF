@@ -42,13 +42,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     Eigen::MatrixXd mnoise;
 
-    mnoise = 1e-4*Eigen::MatrixXd::Identity(2,2);
+    mnoise = 1e-4*Eigen::MatrixXd::Identity(1,1);
     forceest1.set_measurement_noise(mnoise);
 
     Eigen::MatrixXd measurement_matrix;
-    measurement_matrix.setZero(2,2);
-    measurement_matrix<< 1,0
-                          ,0,1;
+    measurement_matrix.setZero(1,2);
+    measurement_matrix<< 1,0;
+
 
     forceest1.set_measurement_matrix(measurement_matrix);
 
@@ -81,9 +81,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
       Eigen::VectorXd measure_vector;
-      measure_vector.setZero(2);
+      measure_vector.setZero(1);
 
-      measure_vector<<measure ,velocity+ (rand()%100-50)*0.0001;
+      measure_vector<<measure ;
 
 
       forceest1.correct(measure_vector);
