@@ -35,19 +35,16 @@ MainWindow::MainWindow(QWidget *parent) :
     double measure=0.0;
     double dt =0.02;
     double T=0.0;
-
+    double mvelocity=0.0;
     forceest forceest1(statesize,measurementsize);
 
 
 
-    Eigen::MatrixXd mnoise;
-
-    mnoise = 1e-4*Eigen::MatrixXd::Identity(1,1);
-    forceest1.set_measurement_noise(mnoise);
 
     Eigen::MatrixXd measurement_matrix;
-    measurement_matrix.setZero(1,2);
-    measurement_matrix<< 1,0;
+    measurement_matrix.setZero(2,2);
+    measurement_matrix<< 1,0
+                         ,0,1   ;
 
 
     forceest1.set_measurement_matrix(measurement_matrix);
@@ -57,11 +54,12 @@ MainWindow::MainWindow(QWidget *parent) :
     forceest1.dt = 0.02;
     Eigen::MatrixXd noise;
     noise.setZero(measurementsize,measurementsize);
-    noise =50e-3* Eigen::MatrixXd::Identity(measurementsize,measurementsize);
+    //noise =50e-3* Eigen::MatrixXd::Identity(measurementsize,measurementsize);
 
+    noise << 0.05,0,0,0.05;
     forceest1.set_measurement_noise(noise);
 
-    noise =5e-8* Eigen::MatrixXd::Identity(statesize,statesize);
+    noise =5e-3* Eigen::MatrixXd::Identity(statesize,statesize);
     forceest1.set_process_noise(noise);
 
 
@@ -73,24 +71,25 @@ MainWindow::MainWindow(QWidget *parent) :
       T+=dt;
 
       pos = pos+ velocity* dt;
-      measure = pos+ (rand()%100-50)*0.001;
       velocity = (cos(1.2*pos) )+0.99*velocity;
 
+      measure = pos+ (rand()%100-50)*0.001;
+      mvelocity = velocity + (rand()%100-50)*0.01;
 
       forceest1.predict();
 
 
       Eigen::VectorXd measure_vector;
-      measure_vector.setZero(1);
+      measure_vector.setZero(2);
 
-      measure_vector<<measure ;
+      measure_vector<<measure , mvelocity  ;
 
 
       forceest1.correct(measure_vector);
 
       x[i] = T;
       y[i] = pos; // let's plot a rquadratic function
-      z[i] = velocity;
+      z[i] = mvelocity;
       w[i] = measure;
 
        p[i] = forceest1.x(0);
@@ -109,11 +108,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsNone);
 
 
-    pen.setColor(Qt::blue);
+    pen.setColor(Qt::red);
     pen.setWidth(2);
 
     ui->customPlot_2->addGraph();
     ui->customPlot_2->graph(0)->setData(x, q);
+
     ui->customPlot_2->graph(0)->setName("Estimate");
     ui->customPlot_2->graph(0)->setPen(pen);
 
@@ -131,7 +131,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->customPlot_2->addGraph();
     ui->customPlot_2->graph(1)->setData(x, z);
-    ui->customPlot_2->graph(1)->setName("real");
+    pen.setColor(Qt::black);
+    pen.setWidth(1);
+    ui->customPlot_2->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
+    ui->customPlot_2->graph(1)->setLineStyle(QCPGraph::lsNone);
+    ui->customPlot_2->graph(1)->setName("measurement");
     ui->customPlot_2->graph(1)->setPen(pen);
 
     ui->customPlot->xAxis->setRange(0, 7);

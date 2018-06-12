@@ -12,8 +12,7 @@ Eigen::MatrixXd forceest::dynamics(Eigen::MatrixXd sigma_state){
         double v_ ;
 
         p_ = p+v*dt;
-        v_ = cos(0.6*p)* cos(0.6*p) - sin(0.6*p) * sin(0.6*p) +0.99*v;
-
+        v_ = v;
 
         predict_sigma_state(pos,i) =  p_ ;
         predict_sigma_state(velocity,i) =  v_;
