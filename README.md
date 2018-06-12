@@ -10,11 +10,13 @@ and estimate the velocity of object.
 ### System dynamics
 
 x_dot_k+1 = x_dot_k _ v*dt
+
 v = cos(x)+0.99*x_dot
 
 ### state variable
 
 x
+
 v
 
 ### measurement variable
@@ -22,6 +24,7 @@ v
 x position
 
 ### measurement matrix
+
 H = [1 0]
 
 position estimate 
@@ -39,20 +42,24 @@ Assuming that the nonlinear system dynamics is unknown. However we can measure b
 ### System dynamics
 
 x_dot_k+1 = x_dot_k _ v*dt
+
 v_k+1 = v_k
 
 ### state variable
 
 x position
+
 v velocity
 
 ### measurement variable
 
 x position
+
 v velocity
 
 ### measurement matrix
 H = 1 0
+
     0 1
 
 ![Alt Text](simulate/position_2.png)
