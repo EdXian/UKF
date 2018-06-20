@@ -4,6 +4,7 @@
 #include "math.h"
 #include "ukf.h"
 #include "forceest.h"
+#include "lpf.h"
 using Eigen::MatrixXd;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -62,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
     noise =5e-3* Eigen::MatrixXd::Identity(statesize,statesize);
     forceest1.set_process_noise(noise);
 
-
+    lpf lpf1(10,dt);
     QVector<double> x(1001), y(1001) ,z(1001),w(1001),p(1001),q(1001); // initialize with entries 0..100
     for (int i=0; i<1001; ++i)
     {
@@ -73,8 +74,12 @@ MainWindow::MainWindow(QWidget *parent) :
       pos = pos+ velocity* dt;
       velocity = (cos(1.2*pos) )+0.99*velocity;
 
+
+
       measure = pos+ (rand()%100-50)*0.001;
       mvelocity = velocity + (rand()%100-50)*0.01;
+
+
 
       forceest1.predict();
 
@@ -93,7 +98,8 @@ MainWindow::MainWindow(QWidget *parent) :
       w[i] = measure;
 
        p[i] = forceest1.x(0);
-       q[i] = forceest1.x(1);
+
+       q[i] = forceest1.x(1);   //forceest1.x(1);  // velocity estimate
 
     }
     // create graph and assign data to it:
@@ -133,8 +139,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->customPlot_2->graph(1)->setData(x, z);
     pen.setColor(Qt::black);
     pen.setWidth(1);
-    ui->customPlot_2->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
-    ui->customPlot_2->graph(1)->setLineStyle(QCPGraph::lsNone);
+//    ui->customPlot_2->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));
+//    ui->customPlot_2->graph(1)->setLineStyle(QCPGraph::lsNone);
     ui->customPlot_2->graph(1)->setName("measurement");
     ui->customPlot_2->graph(1)->setPen(pen);
 

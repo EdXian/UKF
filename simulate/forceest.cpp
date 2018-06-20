@@ -22,3 +22,18 @@ Eigen::MatrixXd forceest::dynamics(Eigen::MatrixXd sigma_state){
 
 
 }
+
+Eigen::MatrixXd forceest::measure_to_state(Eigen::MatrixXd sigma_state){
+
+    Eigen::MatrixXd predict_sigma_measure(this->y_size,this->x_sigmavector_size);
+
+    for(int i=0;i<this->x_sigmavector_size;i++){
+
+        predict_sigma_measure( mpos ,i) =   sigma_state(pos,i);
+        predict_sigma_measure( mvel ,i) =  sigma_state(velocity,i);
+
+    }
+    return predict_sigma_measure;
+
+
+}

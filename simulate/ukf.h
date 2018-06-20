@@ -21,6 +21,9 @@ public:
     int x_sigmavector_size;
     int y_sigmavector_size;
     virtual Eigen::MatrixXd  dynamics(Eigen::MatrixXd  sigma_state);
+    virtual Eigen::MatrixXd  measure_to_state(Eigen::MatrixXd  sigma_state);
+
+
     Eigen::MatrixXd rotate(double roll , double yaw , double pitch);
 
     void set_process_noise(Eigen::MatrixXd matrix);

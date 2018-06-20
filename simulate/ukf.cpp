@@ -100,7 +100,9 @@ void ukf::predict(){
     P_+= Q;
 
   for(int i=0;i<x_sigmavector_size ; i++){
-    y_sigmavector = H*x_sigmavector;
+
+      y_sigmavector = measure_to_state( x_sigmavector);
+//       y_sigmavector = H* x_sigmavector;
   }
 
   //y_hat (mean)
@@ -155,6 +157,16 @@ void ukf::correct(Eigen::VectorXd measure){
     P = P_ - Kalman_gain*P_yy*(Kalman_gain.transpose());
 
 }
+
+Eigen::MatrixXd  ukf::measure_to_state(Eigen::MatrixXd  sigma_state){
+
+}
+
+
+
+
+
+
 
 
 Eigen::MatrixXd ukf::dynamics(Eigen::MatrixXd sigma_state){
