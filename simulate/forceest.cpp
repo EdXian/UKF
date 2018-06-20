@@ -23,7 +23,7 @@ Eigen::MatrixXd forceest::dynamics(Eigen::MatrixXd sigma_state){
 
 }
 
-Eigen::MatrixXd forceest::measure_to_state(Eigen::MatrixXd sigma_state){
+Eigen::MatrixXd forceest::state_to_measure(Eigen::MatrixXd sigma_state){
 
     Eigen::MatrixXd predict_sigma_measure(this->y_size,this->x_sigmavector_size);
 

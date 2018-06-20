@@ -101,7 +101,7 @@ void ukf::predict(){
 
   for(int i=0;i<x_sigmavector_size ; i++){
 
-      y_sigmavector = measure_to_state( x_sigmavector);
+      y_sigmavector = state_to_measure(x_sigmavector);
 //       y_sigmavector = H* x_sigmavector;
   }
 
@@ -158,15 +158,9 @@ void ukf::correct(Eigen::VectorXd measure){
 
 }
 
-Eigen::MatrixXd  ukf::measure_to_state(Eigen::MatrixXd  sigma_state){
+Eigen::MatrixXd  ukf::state_to_measure(Eigen::MatrixXd  sigma_state){
 
 }
-
-
-
-
-
-
 
 
 Eigen::MatrixXd ukf::dynamics(Eigen::MatrixXd sigma_state){
